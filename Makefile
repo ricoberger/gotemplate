@@ -1,7 +1,7 @@
 WHAT := gotemplate
 
 BRANCH      ?= $(shell git rev-parse --abbrev-ref HEAD)
-BUILDTIME   ?= $(shell date '+%Y%m%d-%H:%M:%S')
+BUILDTIME   ?= $(shell date '+%Y-%m-%d@%H:%M:%S')
 BUILDUSER   ?= $(shell id -un)
 DOCKER_REPO ?= ricoberger
 PWD         ?= $(shell pwd)
