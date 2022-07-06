@@ -2,10 +2,12 @@ package version
 
 import (
 	"bytes"
-	"fmt"
 	"runtime"
 	"strings"
 	"text/template"
+
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 // Build information. Populated at build-time.
@@ -28,7 +30,7 @@ var versionInfoTmpl = `
 
 // Print returns version information.
 func Print(program string) (string, error) {
-	m := map[string]string{
+	data := map[string]string{
 		"program":   program,
 		"version":   Version,
 		"revision":  Revision,
@@ -37,24 +39,20 @@ func Print(program string) (string, error) {
 		"buildDate": BuildDate,
 		"goVersion": GoVersion,
 	}
-	t, err := template.New("version").Parse(versionInfoTmpl)
-	if err != nil {
-		return "", err
-	}
 
 	var buf bytes.Buffer
-	if err := t.ExecuteTemplate(&buf, "version", m); err != nil {
-		return "", err
-	}
+	tmpl := template.Must(template.New("version").Parse(versionInfoTmpl))
+	tmpl.ExecuteTemplate(&buf, "version", data)
+
 	return strings.TrimSpace(buf.String()), nil
 }
 
 // Info returns version, branch and revision information.
-func Info() string {
-	return fmt.Sprintf("(version=%s, branch=%s, revision=%s)", Version, Branch, Revision)
+func Info() []zapcore.Field {
+	return []zapcore.Field{zap.String("version", Version), zap.String("branch", Branch), zap.String("revision", Revision)}
 }
 
 // BuildContext returns goVersion, buildUser and buildDate information.
-func BuildContext() string {
-	return fmt.Sprintf("(go=%s, user=%s, date=%s)", GoVersion, BuildUser, BuildDate)
+func BuildContext() []zapcore.Field {
+	return []zapcore.Field{zap.String("go", GoVersion), zap.String("user", BuildUser), zap.String("date", BuildDate)}
 }
